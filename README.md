@@ -174,8 +174,17 @@ ENCRYPTION_KEY=your_fernet_key
 ## UI Preview
 
 ### Dashboard
----
 
+![Dashboard](assets/images/Dashboard.jpeg)
+
+---
+### Upload Page
+
+![Upload](assets/images/Upload_Schedule.jpeg)
+
+---
+### Profile Page
+![Profile](assets/images/Profile.jpeg)
 
 ---
 
