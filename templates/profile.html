@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
+
+    <h2 class="text-xl font-bold mb-4">Instagram API Settings</h2>
+    {% if has_token %}
+        <p class="mb-4 text-sm text-green-700">A token is currently saved for this account.</p>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <input type="password" name="token"
+               placeholder="Access Token"
+               class="w-full border p-2 rounded mb-4">
+
+        <button class="bg-green-600 text-white px-4 py-2 rounded w-full">
+            Save Token
+        </button>
+    </form>
+
+</div>
+
+{% endblock %}
