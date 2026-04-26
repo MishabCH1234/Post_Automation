@@ -171,12 +171,11 @@ ENCRYPTION_KEY=your_fernet_key
 
 ---
 
-##  Future Improvements
+## UI Preview
 
-* AWS S3 for media storage
-* Celery Beat for periodic analytics
-* Docker & CI/CD pipeline
-* React frontend integration
+### Dashboard
+---
+
 
 ---
 
