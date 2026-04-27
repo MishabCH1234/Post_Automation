@@ -183,7 +183,9 @@ ENCRYPTION_KEY=your_fernet_key
 
 ### Dashboard
 
-![Dashboard](assets/images/Dashboard.jpeg)
+![Dashboard](assets/images/Screenshot_27-4-2026_122227_127.0.0.1.jpeg)
+![Dashboard](assets/images/Screenshot_27-4-2026_122317_127.0.0.1.jpeg)
+
 
 ---
 ### Upload Page
