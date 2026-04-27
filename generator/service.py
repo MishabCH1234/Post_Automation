@@ -3,12 +3,23 @@ import base64
 import requests
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "dall-e-3")
+OPENAI_IMAGE_MODEL = os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1")
+
+
+class OpenAIImageError(RuntimeError):
+    pass
 
 
 def generate_image_bytes(prompt):
     if not OPENAI_API_KEY:
         raise RuntimeError("OPENAI_API_KEY is not configured.")
+
+    payload = {
+        "model": OPENAI_IMAGE_MODEL,
+        "prompt": prompt,
+        "size": "1024x1024",
+        "n": 1,
+    }
 
     response = requests.post(
         "https://api.openai.com/v1/images/generations",
@@ -16,17 +27,17 @@ def generate_image_bytes(prompt):
             "Authorization": f"Bearer {OPENAI_API_KEY}",
             "Content-Type": "application/json",
         },
-        json={
-            "model": OPENAI_IMAGE_MODEL,
-            "prompt": prompt,
-            "size": "1024x1024",
-            "n": 1,
-        },
+        json=payload,
         timeout=60,
     )
-    if response.status_code != 200:
-        print(f"Error: {response.status_code} - {response.text}")
-    response.raise_for_status()
+    if not response.ok:
+        try:
+            error_body = response.json()
+        except ValueError:
+            error_body = response.text
+        raise OpenAIImageError(
+            f"OpenAI image generation failed: {response.status_code} {error_body}"
+        )
 
     data = response.json().get("data", [])
     if not data:

@@ -156,7 +156,7 @@ SITE_URL = os.getenv("SITE_URL", "").rstrip("/")
 
 STATIC_URL = 'static/'
 
-CELERY_BROKER_URL = os.getenv("REDIS_URL")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL") or os.getenv("REDIS_URL")
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

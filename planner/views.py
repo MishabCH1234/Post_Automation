@@ -4,10 +4,12 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from accounts.models import UserProfile
+from analytics.models import PostAnalytics
 from .models import WeeklyPlan
 from .forms import UploadFileForm
 from scheduler.tasks import process_plan
@@ -64,12 +66,67 @@ def _queue_plan_processing(request, plan):
 @login_required
 def dashboard(request):
     posts = WeeklyPlan.objects.filter(user=request.user).order_by('-scheduled_time')
+    today = timezone.localdate()
+    report_dates = [today - timezone.timedelta(days=offset) for offset in range(4, -1, -1)]
+    report_start = report_dates[0]
+    recent_posts = list(
+        posts.filter(
+            Q(posted_at__date__gte=report_start)
+            | Q(posted_at__isnull=True, scheduled_time__date__gte=report_start)
+        )
+    )
+    analytics_by_plan = {
+        item.plan_id: item
+        for item in PostAnalytics.objects.filter(plan__in=recent_posts)
+    }
+
+    daily_report = []
+    for report_date in report_dates:
+        day_posts = [
+            post for post in recent_posts
+            if timezone.localtime(post.posted_at or post.scheduled_time).date() == report_date
+        ]
+        day_analytics = [analytics_by_plan.get(post.id) for post in day_posts]
+        daily_report.append({
+            'date': report_date,
+            'post_count': len(day_posts),
+            'views': sum(item.impressions for item in day_analytics if item),
+            'likes': sum(item.likes for item in day_analytics if item),
+        })
+
+    recent_post_report = []
+    for post in recent_posts:
+        analytics = analytics_by_plan.get(post.id)
+        recent_post_report.append({
+            'title': post.title,
+            'status': post.get_status_display(),
+            'scheduled_time': post.scheduled_time,
+            'has_ai_image': bool(post.image),
+            'views': analytics.impressions if analytics else 0,
+            'likes': analytics.likes if analytics else 0,
+            'reach': analytics.reach if analytics else 0,
+            'metadata': {
+                'caption': post.description,
+                'content': post.content,
+                'image': post.image.name if post.image else '',
+            },
+        })
+
+    report_totals = {
+        'views': sum(item['views'] for item in daily_report),
+        'likes': sum(item['likes'] for item in daily_report),
+        'posts': sum(item['post_count'] for item in daily_report),
+    }
+
     context = {
         'posts': posts,
         'scheduled_count': posts.filter(
             status__in=[WeeklyPlan.STATUS_PENDING, WeeklyPlan.STATUS_PROCESSING, WeeklyPlan.STATUS_SCHEDULED]
         ).count(),
         'posted_count': posts.filter(status=WeeklyPlan.STATUS_POSTED).count(),
+        'daily_report': daily_report,
+        'recent_post_report': recent_post_report,
+        'report_totals': report_totals,
     }
     return render(request, 'dashboard.html', context)
 

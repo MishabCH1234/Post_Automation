@@ -22,6 +22,8 @@ class WeeklyPlan(models.Model):
     content = models.TextField()
     scheduled_time = models.DateTimeField()
     image = models.FileField(upload_to='posts/', null=True, blank=True)
+    instagram_media_id = models.CharField(max_length=255, blank=True)
+    posted_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,

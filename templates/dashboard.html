@@ -20,6 +20,63 @@
     </div>
 </div>
 
+<section class="mb-6">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xl font-bold">Last 5 Days Performance</h3>
+        <div class="text-sm text-gray-600">
+            {{ report_totals.posts }} posts · {{ report_totals.views }} views · {{ report_totals.likes }} likes
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+        {% for day in daily_report %}
+            <div class="bg-white p-4 rounded shadow">
+                <p class="text-sm text-gray-500">{{ day.date|date:"M d" }}</p>
+                <p class="text-2xl font-bold">{{ day.views }}</p>
+                <p class="text-sm text-gray-600">Views</p>
+                <div class="mt-3 flex justify-between text-sm">
+                    <span>{{ day.likes }} likes</span>
+                    <span>{{ day.post_count }} posts</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="bg-white shadow rounded overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="p-3">AI Post</th>
+                    <th class="p-3">Views</th>
+                    <th class="p-3">Likes</th>
+                    <th class="p-3">Metadata</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in recent_post_report %}
+                    <tr class="border-t align-top">
+                        <td class="p-3">
+                            <p class="font-semibold">{{ item.title }}</p>
+                            <p class="text-sm text-gray-500">{{ item.status }} · {{ item.scheduled_time }}</p>
+                        </td>
+                        <td class="p-3">{{ item.views }}</td>
+                        <td class="p-3">{{ item.likes }}</td>
+                        <td class="p-3 text-sm text-gray-700">
+                            <p>Reach: {{ item.reach }}</p>
+                            <p>AI image: {% if item.has_ai_image %}Generated{% else %}Not generated{% endif %}</p>
+                            <p class="truncate max-w-md">Caption: {{ item.metadata.caption }}</p>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-6 text-center text-gray-500">No automated posts in the last 5 days.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
 <div class="bg-white shadow rounded overflow-hidden">
     <table class="w-full text-left">
         <thead class="bg-gray-200">

@@ -4,6 +4,7 @@ from generator.service import generate_image_bytes
 import requests
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.utils import timezone
 from urllib.parse import urljoin
 
 @shared_task(bind=True, max_retries=3)
@@ -72,9 +73,12 @@ def schedule_post(self, plan_id):
             "access_token": token
         })
         publish_response.raise_for_status()
+        publish_data = publish_response.json()
 
         plan.status = WeeklyPlan.STATUS_POSTED
-        plan.save()
+        plan.instagram_media_id = publish_data.get('id', creation_id)
+        plan.posted_at = timezone.now()
+        plan.save(update_fields=['status', 'instagram_media_id', 'posted_at'])
 
     except Exception as e:
         if plan is not None and self.request.retries + 1 >= self.max_retries:
