@@ -102,6 +102,14 @@ python manage.py tailwind start
 ```bash
 redis-server
 ```
+or
+Install/open Docker Desktop
+
+```bash
+docker run --name post-redis -p 6379:6379 -d redis
+Test-NetConnection 127.0.0.1 -Port 6379
+```
+
 
 ### 9️ Start Celery worker
 
